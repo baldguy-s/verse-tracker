@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verse Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1b2d;
+    --card: #162032;
+    --card2: #1a2840;
+    --accent-blue: #4a9eff;
+    --accent-orange: #ff8c42;
+    --accent-gold: #ffd166;
+    --text: #e8f1ff;
+    --text-dim: #7a9abf;
+    --penguin-body: #1a1a2e;
+    --owl-body: #8b6914;
+    --success: #5cb85c;
+    --danger: #e74c3c;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 40px;
+    background-image: radial-gradient(ellipse at 20% 10%, rgba(74,158,255,0.08) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 80%, rgba(255,140,66,0.07) 0%, transparent 60%);
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.9rem;
+    letter-spacing: 1px;
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 4px;
+    text-shadow: 0 0 20px rgba(255,209,102,0.3);
+  }
+
+  .subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 18px;
+    letter-spacing: 0.5px;
+  }
+
+  /* SERVICE SELECTOR */
+  .service-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .service-btn {
+    background: var(--card2);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    color: var(--text-dim);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .service-btn:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+  .service-btn.active { background: var(--accent-gold); color: #0f1b2d; border-color: var(--accent-gold); }
+
+  /* STATUS BANNER */
+  .status-banner {
+    width: 100%;
+    max-width: 400px;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 10px 16px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 22px;
+    border: 1.5px solid rgba(255,209,102,0.2);
+    color: var(--text-dim);
+    transition: all 0.3s;
+  }
+
+  .status-banner.live {
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(92,184,92,0.08);
+  }
+
+  .status-banner.closed {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(231,76,60,0.08);
+  }
+
+  /* ANIMAL BUTTONS */
+  .button-row {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .animal-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .animal-btn:active { transform: scale(0.92); }
+  .animal-btn:disabled { cursor: not-allowed; opacity: 0.4; }
+  .animal-btn:disabled:active { transform: none; }
+
+  .animal-btn svg { filter: drop-shadow(0 6px 18px rgba(0,0,0,0.5)); }
+
+  .animal-btn .label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+  }
+
+  .animal-btn .count-badge {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.4rem;
+    line-height: 1;
+  }
+
+  #penguin-btn .label { color: var(--accent-blue); }
+  #penguin-btn .count-badge { color: var(--accent-blue); text-shadow: 0 0 15px rgba(74,158,255,0.5); }
+
+  #owl-btn .label { color: var(--accent-orange); }
+  #owl-btn .count-badge { color: var(--accent-orange); text-shadow: 0 0 15px rgba(255,140,66,0.5); }
+
+  /* PING ANIMATION */
+  @keyframes ping {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  .ping { animation: ping 0.3s ease-out; }
+
+  /* SERVICE OVER BUTTON */
+  .service-over-btn {
+    background: transparent;
+    border: 2px solid var(--danger);
+    color: var(--danger);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 10px 28px;
+    border-radius: 30px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    margin-bottom: 30px;
+  }
+
+  .service-over-btn:hover { background: var(--danger); color: #fff; }
+  .service-over-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+  .service-over-btn:disabled:hover { background: transparent; color: var(--danger); }
+
+  /* SCOREBOARD */
+  .scoreboard-toggle {
+    background: none;
+    border: 2px solid rgba(255,209,102,0.35);
+    color: var(--accent-gold);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .scoreboard-toggle:hover { background: rgba(255,209,102,0.1); }
+
+  .scoreboard {
+    width: 100%;
+    max-width: 400px;
+    display: none;
+  }
+
+  .scoreboard.open { display: block; }
+
+  .scoreboard-header {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--accent-gold);
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .totals-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .total-card {
+    flex: 1;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    text-align: center;
+    border: 1.5px solid transparent;
+  }
+
+  .total-card.blue { border-color: rgba(74,158,255,0.3); }
+  .total-card.orange { border-color: rgba(255,140,66,0.3); }
+
+  .total-card .kid-name {
+    font-weight: 800;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+
+  .total-card.blue .kid-name { color: var(--accent-blue); }
+  .total-card.orange .kid-name { color: var(--accent-orange); }
+
+  .total-card .big-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.2rem;
+    line-height: 1;
+  }
+
+  .total-card.blue .big-num { color: var(--accent-blue); }
+  .total-card.orange .big-num { color: var(--accent-orange); }
+
+  .total-card .label-sm { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+
+  /* RESET ALL BUTTON */
+  .reset-all-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 16px;
+    background: transparent;
+    border: 1.5px solid rgba(231,76,60,0.4);
+    color: var(--danger);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+  }
+  .reset-all-btn:hover { background: rgba(231,76,60,0.12); border-color: var(--danger); }
+
+  /* CONFIRM MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: #1a2840;
+    border: 1.5px solid var(--danger);
+    border-radius: 18px;
+    padding: 28px 24px;
+    max-width: 300px;
+    width: 90%;
+    text-align: center;
+  }
+  .modal-box h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--danger);
+    margin-bottom: 10px;
+  }
+  .modal-box p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 22px; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 10px; }
+  .modal-cancel {
+    flex: 1;
+    background: var(--card2);
+    border: none;
+    color: var(--text-dim);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .modal-confirm {
+    flex: 1;
+    background: var(--danger);
+    border: none;
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  /* LOG ENTRIES */
+  .log-section { margin-bottom: 10px; }
+
+  .log-section-title {
+    font-weight: 800;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  .log-entry {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    border-left: 3px solid transparent;
+    gap: 8px;
+  }
+
+  .log-entry .entry-date { color: var(--text-dim); }
+  .log-entry .entry-service { color: var(--text); font-weight: 700; }
+
+  .entry-counts { display: flex; gap: 14px; align-items: center; }
+
+  .entry-count { font-weight: 800; font-size: 0.9rem; }
+  .entry-count.blue { color: var(--accent-blue); }
+  .entry-count.orange { color: var(--accent-orange); }
+
+  .delete-entry-btn {
+    background: none;
+    border: 1px solid rgba(231,76,60,0.35);
+    color: rgba(231,76,60,0.6);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    padding: 3px 7px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    transition: all 0.18s;
+    flex-shrink: 0;
+  }
+  .delete-entry-btn:hover { background: rgba(231,76,60,0.15); color: var(--danger); border-color: var(--danger); }
+
+  .edit-entry-btn {
+    background: none;
+    border: 1px solid rgba(74,158,255,0.35);
+    color: rgba(74,158,255,0.6);
+    border-radius: 6px;
+    font-size: 0.72rem;
+    padding: 3px 7px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    transition: all 0.18s;
+    flex-shrink: 0;
+  }
+  .edit-entry-btn:hover { background: rgba(74,158,255,0.15); color: var(--accent-blue); border-color: var(--accent-blue); }
+
+  /* EDIT MODAL INPUTS */
+  .edit-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .edit-field label { font-size: 0.75rem; color: var(--text-dim); font-weight: 700; display: block; margin-bottom: 4px; letter-spacing: 0.3px; }
+  .edit-field input[type=number] {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    padding: 8px 12px;
+    text-align: center;
+    outline: none;
+  }
+  .edit-field input[type=number]:focus { border-color: var(--accent-blue); }
+  .modal-confirm.blue { background: var(--accent-blue); }
+
+  .empty-log {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    padding: 20px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a2840;
+    border: 1.5px solid var(--success);
+    color: var(--success);
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 10px 22px;
+    border-radius: 30px;
+    transition: transform 0.3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<h1>📖 Verse Tracker</h1>
+<p class="subtitle">Who's turning first?</p>
+
+<!-- SERVICE SELECTOR -->
+<div class="service-bar">
+  <button class="service-btn active" data-service="Sunday AM" onclick="selectService(this)">Sunday AM</button>
+  <button class="service-btn" data-service="Sunday PM" onclick="selectService(this)">Sunday PM</button>
+  <button class="service-btn" data-service="Wednesday" onclick="selectService(this)">Wednesday</button>
+</div>
+
+<!-- STATUS -->
+<div class="status-banner live" id="statusBanner">🟢 Service open — tap to count!</div>
+
+<!-- ANIMAL BUTTONS -->
+<div class="button-row">
+
+  <!-- PENGUIN = L -->
+  <button class="animal-btn" id="penguin-btn" onclick="addCount('L')">
+    <div class="count-badge" id="l-count">0</div>
+    <svg width="120" height="140" viewBox="0 0 120 140">
+      <defs>
+        <filter id="blueGlow" x="-40%" y="-40%" width="180%" height="180%">
+          <feFlood flood-color="#4a9eff" flood-opacity="1" result="color"/>
+          <feComposite in="color" in2="SourceGraphic" operator="in" result="coloredShape"/>
+          <feGaussianBlur in="coloredShape" stdDeviation="7" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g filter="url(#blueGlow)">
+      <!-- Body -->
+      <ellipse cx="60" cy="90" rx="36" ry="44" fill="#1a1a2e"/>
+      <!-- Belly -->
+      <ellipse cx="60" cy="97" rx="22" ry="30" fill="#e8f1ff"/>
+      <!-- Head -->
+      <ellipse cx="60" cy="46" rx="26" ry="26" fill="#1a1a2e"/>
+      <!-- Face white -->
+      <ellipse cx="60" cy="48" rx="16" ry="16" fill="#e8f1ff"/>
+      <!-- Eyes -->
+      <circle cx="53" cy="43" r="5" fill="white"/>
+      <circle cx="67" cy="43" r="5" fill="white"/>
+      <circle cx="54" cy="43" r="3" fill="#0a0a1a"/>
+      <circle cx="68" cy="43" r="3" fill="#0a0a1a"/>
+      <!-- Eye shine -->
+      <circle cx="55" cy="42" r="1" fill="white"/>
+      <circle cx="69" cy="42" r="1" fill="white"/>
+      <!-- Beak -->
+      <ellipse cx="60" cy="54" rx="6" ry="4" fill="#ffd166"/>
+      <!-- Wings -->
+      <ellipse cx="26" cy="88" rx="10" ry="22" fill="#1a1a2e" transform="rotate(-10 26 88)"/>
+      <ellipse cx="94" cy="88" rx="10" ry="22" fill="#1a1a2e" transform="rotate(10 94 88)"/>
+      <!-- Feet -->
+      <ellipse cx="48" cy="133" rx="12" ry="6" fill="#ffd166"/>
+      <ellipse cx="72" cy="133" rx="12" ry="6" fill="#ffd166"/>
+      <!-- L letter -->
+      </g>
+    </svg>
+  </button>
+
+  <!-- OWL = N -->
+  <button class="animal-btn" id="owl-btn" onclick="addCount('N')">
+    <div class="count-badge" id="n-count">0</div>
+    <svg width="120" height="140" viewBox="0 0 120 140">
+      <defs>
+        <filter id="orangeGlow" x="-40%" y="-40%" width="180%" height="180%">
+          <feFlood flood-color="#ff8c42" flood-opacity="1" result="color"/>
+          <feComposite in="color" in2="SourceGraphic" operator="in" result="coloredShape"/>
+          <feGaussianBlur in="coloredShape" stdDeviation="7" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g filter="url(#orangeGlow)">
+      <!-- Body -->
+      <ellipse cx="60" cy="95" rx="34" ry="38" fill="#8b6914"/>
+      <!-- Belly stripes -->
+      <ellipse cx="60" cy="100" rx="20" ry="26" fill="#d4a843"/>
+      <ellipse cx="60" cy="103" rx="16" ry="20" fill="#c49030"/>
+      <ellipse cx="60" cy="106" rx="12" ry="15" fill="#d4a843"/>
+      <!-- Head -->
+      <ellipse cx="60" cy="50" rx="28" ry="27" fill="#8b6914"/>
+      <!-- Ear tufts -->
+      <polygon points="42,26 36,10 50,20" fill="#8b6914"/>
+      <polygon points="78,26 84,10 70,20" fill="#8b6914"/>
+      <!-- Eye rings -->
+      <circle cx="49" cy="47" r="13" fill="#d4a843"/>
+      <circle cx="71" cy="47" r="13" fill="#d4a843"/>
+      <!-- Eyes -->
+      <circle cx="49" cy="47" r="9" fill="#fff"/>
+      <circle cx="71" cy="47" r="9" fill="#fff"/>
+      <circle cx="50" cy="47" r="6" fill="#ff8c42"/>
+      <circle cx="72" cy="47" r="6" fill="#ff8c42"/>
+      <circle cx="50" cy="47" r="3.5" fill="#1a0a00"/>
+      <circle cx="72" cy="47" r="3.5" fill="#1a0a00"/>
+      <!-- Eye shine -->
+      <circle cx="51.5" cy="45.5" r="1.2" fill="white"/>
+      <circle cx="73.5" cy="45.5" r="1.2" fill="white"/>
+      <!-- Beak -->
+      <polygon points="60,56 53,63 67,63" fill="#e8a000"/>
+      <!-- Wings -->
+      <ellipse cx="26" cy="97" rx="10" ry="22" fill="#7a5a10" transform="rotate(-8 26 97)"/>
+      <ellipse cx="94" cy="97" rx="10" ry="22" fill="#7a5a10" transform="rotate(8 94 97)"/>
+      <!-- Feet/talons -->
+      <line x1="48" y1="130" x2="38" y2="138" stroke="#c49030" stroke-width="3" stroke-linecap="round"/>
+      <line x1="48" y1="130" x2="44" y2="139" stroke="#c49030" stroke-width="3" stroke-linecap="round"/>
+      <line x1="48" y1="130" x2="52" y2="139" stroke="#c49030" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="130" x2="62" y2="138" stroke="#c49030" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="130" x2="68" y2="139" stroke="#c49030" stroke-width="3" stroke-linecap="round"/>
+      <line x1="72" y1="130" x2="76" y2="139" stroke="#c49030" stroke-width="3" stroke-linecap="round"/>
+      <!-- N letter -->
+      </g>
+    </svg>
+  </button>
+
+</div>
+
+<!-- SERVICE OVER -->
+<button class="service-over-btn" id="serviceOverBtn" onclick="endService()">🔒 Service Over</button>
+
+<!-- SCOREBOARD TOGGLE -->
+<button class="scoreboard-toggle" onclick="toggleScoreboard()">📋 View Scoreboard</button>
+
+<!-- SCOREBOARD -->
+<div class="scoreboard" id="scoreboard">
+  <div class="scoreboard-header">All-Time Scoreboard</div>
+
+  <div style="display:flex;gap:8px;margin-bottom:16px;">
+    <button class="reset-all-btn" style="margin-bottom:0;flex:1;" onclick="confirmReset()">🗑 Reset All</button>
+    <button class="reset-all-btn" style="margin-bottom:0;flex:1;border-color:rgba(74,158,255,0.4);color:var(--accent-blue);" onclick="openAddModal()">＋ Add Entry</button>
+  </div>
+
+  <div class="totals-row">
+    <div class="total-card blue">
+      <div class="big-num" id="l-total">0</div>
+      <div class="label-sm">total verses</div>
+    </div>
+    <div class="total-card orange">
+      <div class="big-num" id="n-total">0</div>
+      <div class="label-sm">total verses</div>
+    </div>
+  </div>
+
+  <div id="log-container">
+    <div class="empty-log">No services recorded yet.</div>
+  </div>
+</div>
+
+<!-- ADD ENTRY MODAL -->
+<div class="modal-overlay" id="addModalOverlay">
+  <div class="modal-box">
+    <h3 style="color:var(--accent-blue);margin-bottom:16px;">Add Entry</h3>
+    <div class="edit-fields">
+      <div class="edit-field">
+        <label>Date</label>
+        <input type="date" id="addDate" style="width:100%;background:var(--bg);border:1.5px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;padding:8px 12px;outline:none;font-weight:700;">
+      </div>
+      <div class="edit-field">
+        <label>Service</label>
+        <select id="addService" style="width:100%;background:var(--bg);border:1.5px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;padding:8px 12px;outline:none;font-weight:700;">
+          <option>Sunday AM</option>
+          <option>Sunday PM</option>
+          <option>Wednesday</option>
+        </select>
+      </div>
+      <div class="edit-field">
+        <label>🐧 Verses Found</label>
+        <input type="number" id="addL" min="0" max="99" value="0">
+      </div>
+      <div class="edit-field">
+        <label>🦉 Verses Found</label>
+        <input type="number" id="addN" min="0" max="99" value="0">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeAddModal()">Cancel</button>
+      <button class="modal-confirm blue" onclick="saveNewEntry()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModalOverlay">
+  <div class="modal-box">
+    <h3 style="color:var(--accent-blue); margin-bottom:6px;">Edit Entry</h3>
+    <p id="editModalDate" style="font-size:0.8rem;color:var(--text-dim);margin-bottom:16px;"></p>
+    <div class="edit-fields">
+      <div class="edit-field">
+        <label>🐧 Verses Found</label>
+        <input type="number" id="editL" min="0" max="99">
+      </div>
+      <div class="edit-field">
+        <label>🦉 Verses Found</label>
+        <input type="number" id="editN" min="0" max="99">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="modal-confirm blue" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <h3 id="modalTitle">Reset All Scores?</h3>
+    <p id="modalMsg">This will permanently delete every saved service. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-confirm" id="modalConfirmBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentService = 'Sunday AM';
+  let serviceLive = true;
+  let sessionL = 0;
+  let sessionN = 0;
+  let log = JSON.parse(localStorage.getItem('verseLog') || '[]');
+
+  // Give each entry a unique id if missing (for deletion)
+  log = log.map((e, i) => ({ id: e.id || Date.now() + i, ...e }));
+  saveLog();
+
+  function saveLog() { localStorage.setItem('verseLog', JSON.stringify(log)); }
+
+  function selectService(btn) {
+    document.querySelectorAll('.service-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentService = btn.dataset.service;
+    sessionL = 0; sessionN = 0;
+    serviceLive = true;
+    updateSessionDisplay();
+    updateStatusBanner();
+    toggleButtons(false);
+  }
+
+  function addCount(kid) {
+    if (!serviceLive) return;
+    if (kid === 'L') { sessionL++; document.getElementById('l-count').textContent = sessionL; animatePing('l-count'); }
+    else { sessionN++; document.getElementById('n-count').textContent = sessionN; animatePing('n-count'); }
+  }
+
+  function animatePing(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('ping'); void el.offsetWidth; el.classList.add('ping');
+  }
+
+  function endService() {
+    if (!serviceLive) return;
+    if (sessionL === 0 && sessionN === 0) { showToast('No counts recorded yet!'); return; }
+    serviceLive = false;
+    toggleButtons(true);
+    updateStatusBanner();
+    const now = new Date();
+    const entry = {
+      id: now.getTime(),
+      date: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      service: currentService, L: sessionL, N: sessionN, ts: now.getTime()
+    };
+    log.unshift(entry);
+    saveLog();
+    updateScoreboard();
+    showToast('Service saved! 🙌');
+  }
+
+  function toggleButtons(disabled) {
+    document.getElementById('penguin-btn').disabled = disabled;
+    document.getElementById('owl-btn').disabled = disabled;
+    document.getElementById('serviceOverBtn').disabled = disabled;
+  }
+
+  function updateStatusBanner() {
+    const banner = document.getElementById('statusBanner');
+    if (serviceLive) { banner.className = 'status-banner live'; banner.textContent = `🟢 ${currentService} — open!`; }
+    else { banner.className = 'status-banner closed'; banner.textContent = `🔴 ${currentService} — closed. Pick a new service to continue.`; }
+  }
+
+  function updateSessionDisplay() {
+    document.getElementById('l-count').textContent = sessionL;
+    document.getElementById('n-count').textContent = sessionN;
+  }
+
+  function toggleScoreboard() {
+    const sb = document.getElementById('scoreboard');
+    const isOpen = sb.classList.toggle('open');
+    document.querySelector('.scoreboard-toggle').textContent = isOpen ? '▲ Hide Scoreboard' : '📋 View Scoreboard';
+    if (isOpen) updateScoreboard();
+  }
+
+  function updateScoreboard() {
+    document.getElementById('l-total').textContent = log.reduce((s, e) => s + e.L, 0);
+    document.getElementById('n-total').textContent = log.reduce((s, e) => s + e.N, 0);
+    const container = document.getElementById('log-container');
+    if (log.length === 0) { container.innerHTML = '<div class="empty-log">No services recorded yet.</div>'; return; }
+    const grouped = { 'Sunday AM': [], 'Sunday PM': [], 'Wednesday': [] };
+    log.forEach(e => { if (grouped[e.service]) grouped[e.service].push(e); });
+    let html = '';
+    for (const [svc, entries] of Object.entries(grouped)) {
+      if (entries.length === 0) continue;
+      html += `<div class="log-section"><div class="log-section-title">${svc}</div>`;
+      entries.forEach(e => {
+        html += `
+          <div class="log-entry">
+            <div><div class="entry-service">${e.date}</div></div>
+            <div class="entry-counts">
+              <span class="entry-count blue">🐧 ${e.L}</span>
+              <span class="entry-count orange">🦉 ${e.N}</span>
+            </div>
+            <button class="edit-entry-btn" onclick="openEditModal(${e.id})">✎</button>
+            <button class="delete-entry-btn" onclick="confirmDeleteEntry(${e.id})">✕</button>
+          </div>`;
+      });
+      html += `</div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  // ADD MODAL
+  function openAddModal() {
+    // Default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('addDate').value = today;
+    document.getElementById('addL').value = 0;
+    document.getElementById('addN').value = 0;
+    document.getElementById('addModalOverlay').classList.add('show');
+  }
+
+  function closeAddModal() {
+    document.getElementById('addModalOverlay').classList.remove('show');
+  }
+
+  function saveNewEntry() {
+    const dateVal = document.getElementById('addDate').value;
+    if (!dateVal) { showToast('Pick a date first.'); return; }
+    const d = new Date(dateVal + 'T12:00:00');
+    const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const service = document.getElementById('addService').value;
+    const L = parseInt(document.getElementById('addL').value) || 0;
+    const N = parseInt(document.getElementById('addN').value) || 0;
+    const entry = { id: Date.now(), date: dateStr, service, L, N, ts: d.getTime() };
+    log.unshift(entry);
+    log.sort((a, b) => b.ts - a.ts);
+    saveLog();
+    updateScoreboard();
+    closeAddModal();
+    showToast('Entry added! ✅');
+  }
+
+  // EDIT MODAL
+  let editingId = null;
+
+  function openEditModal(id) {
+    const entry = log.find(e => e.id === id);
+    if (!entry) return;
+    editingId = id;
+    document.getElementById('editModalDate').textContent = `${entry.service} — ${entry.date}`;
+    document.getElementById('editL').value = entry.L;
+    document.getElementById('editN').value = entry.N;
+    document.getElementById('editModalOverlay').classList.add('show');
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModalOverlay').classList.remove('show');
+    editingId = null;
+  }
+
+  function saveEdit() {
+    if (editingId === null) return;
+    const newL = parseInt(document.getElementById('editL').value) || 0;
+    const newN = parseInt(document.getElementById('editN').value) || 0;
+    log = log.map(e => e.id === editingId ? { ...e, L: newL, N: newN } : e);
+    saveLog();
+    updateScoreboard();
+    closeEditModal();
+    showToast('Entry updated! ✏️');
+  }
+
+  // MODAL
+  let pendingAction = null;
+
+  function confirmReset() {
+    document.getElementById('modalTitle').textContent = 'Reset All Scores?';
+    document.getElementById('modalMsg').textContent = 'This will permanently delete every saved service. Cannot be undone.';
+    document.getElementById('modalConfirmBtn').onclick = () => { doReset(); closeModal(); };
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function confirmDeleteEntry(id) {
+    document.getElementById('modalTitle').textContent = 'Delete This Entry?';
+    document.getElementById('modalMsg').textContent = 'This service record will be permanently removed.';
+    document.getElementById('modalConfirmBtn').onclick = () => { doDeleteEntry(id); closeModal(); };
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+  function doReset() {
+    log = []; saveLog(); updateScoreboard(); showToast('All scores cleared.');
+  }
+
+  function doDeleteEntry(id) {
+    log = log.filter(e => e.id !== id);
+    saveLog(); updateScoreboard(); showToast('Entry deleted.');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // INIT
+  updateStatusBanner();
+  updateScoreboard();
+</script>
+</body>
+</html>
